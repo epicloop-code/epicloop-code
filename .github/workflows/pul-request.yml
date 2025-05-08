@@ -2,7 +2,7 @@ name: Auto Merge Develop to Main
 
 on:
   schedule:
-    # Runs at 02:00 UTC every day Monday-Friday
+    # Runs at 09:00 UTC every Monday–Friday
     - cron: '0 9 * * 1-5'
 
 jobs:
@@ -11,7 +11,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Check if develop branch exists
+      id: check_branch
+      run: |
+        if git ls-remote --exit-code origin develop; then
+          echo "branch_exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "branch_exists=false" >> $GITHUB_OUTPUT
+        fi
+
     - name: Create pull request
+      if: steps.check_branch.outputs.branch_exists == 'true'
       uses: diillson/auto-pull-request@v1.0.1
       with:
         source_branch: "develop"
@@ -20,7 +30,7 @@ jobs:
         pr_body: |
           :robot: This is an automated pull request merging **develop** into **main**.
 
-          _Created by [diillson/auto-pull-request](https://github.com/diillson/auto-pull-request)_
+          _Created by [epicloop-code/auto-pull-request](https://github.com/epicloop-code/epicloop-code)_
         pr_template: ".github/PULL_REQUEST_TEMPLATE.md"
         pr_reviewer: "diillson,worker"
         pr_assignee: "diillson,worker"
@@ -31,6 +41,7 @@ jobs:
         github_token: ${{ secrets.CUSTOM_GH_TOKEN }}
 
     - name: Auto merge pull request
+      if: steps.check_branch.outputs.branch_exists == 'true'
       uses: pascalgn/automerge-action@v0.16.3
       env:
         GITHUB_TOKEN: ${{ secrets.CUSTOM_GH_TOKEN }}
