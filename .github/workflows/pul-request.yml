@@ -1,28 +1,36 @@
+name: Auto Merge Develop to Main
+
 on:
-  push:
-    branches:
-    - "feature*"  # Support wildcard matching
+  schedule:
+    # Runs at 02:00 UTC every day Monday-Friday
+    - cron: '0 2 * * 1-5'
 
 jobs:
   pull-request:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: pull-request
-    uses: diillson/auto-pull-request@v1.0.1
-      with:
-        source_branch: ""                                 # If blank, default: triggered branch
-        destination_branch: "main"                      # If blank, default: master
-        pr_title: "Pulling ${{ github.ref }} into master" # Title of pull request
-        pr_body: |                                        # Full markdown support, requires pr_title to be set
-          :crown: *An automated PR*
 
-_Created by [diillson/auto-pull-request](https://github.com/diillson/auto-pull-request)_
-        pr_template: ".github/PULL_REQUEST_TEMPLATE.md"   # Path to pull request template, requires pr_title to be set, excludes pr_body
-        pr_reviewer: "diillson,worker"                         # Comma-separated list (no spaces)
-        pr_assignee: "diillson,worker"                         # Comma-separated list (no spaces)
-        pr_label: "auto-pr"                               # Comma-separated list (no spaces)
-        pr_milestone: "Milestone 1"                       # Milestone name no Required it is comment
-        pr_draft: true                                    # Creates pull request as draft
-        pr_allow_empty: true                              # Creates pull request even if there are no changes
-        github_token: ${{ secrets.CUSTOM_GH_TOKEN }}  
+    - name: Create pull request
+      uses: diillson/auto-pull-request@v1.0.1
+      with:
+        source_branch: "develop"
+        destination_branch: "main"
+        pr_title: "Automated PR: Merge develop into main"
+        pr_body: |
+          :robot: This is an automated pull request merging **develop** into **main**.
+
+          _Created by [diillson/auto-pull-request](https://github.com/diillson/auto-pull-request)_
+        pr_template: ".github/PULL_REQUEST_TEMPLATE.md"
+        pr_reviewer: "diillson,worker"
+        pr_assignee: "diillson,worker"
+        pr_label: "auto-pr"
+        pr_milestone: "Milestone 1"
+        pr_draft: false
+        pr_allow_empty: false
+        github_token: ${{ secrets.CUSTOM_GH_TOKEN }}
+
+    - name: Auto merge pull request
+      uses: pascalgn/automerge-action@v0.16.3
+      env:
+        GITHUB_TOKEN: ${{ secrets.CUSTOM_GH_TOKEN }}
