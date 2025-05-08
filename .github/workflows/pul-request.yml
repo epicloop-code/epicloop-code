@@ -3,7 +3,7 @@ name: Auto Merge Develop to Main
 on:
   schedule:
     # Runs at 02:00 UTC every day Monday-Friday
-    - cron: '0 2 * * 1-5'
+    - cron: '0 9 * * 1-5'
 
 jobs:
   pull-request:
